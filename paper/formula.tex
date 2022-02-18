@@ -1,0 +1,35 @@
+\documentclass[a4paper]{ctexart}
+
+\usepackage{mathtools}
+\begin{document}
+    State Definition:
+    三元组$(c, g, b)$表示现金、黄金、比特币的持有比例。为了方便进行强化学习，这些数值是被归一化的，表示当前持仓的分配情况，他们的和为1。
+
+    符号说明：
+
+    \begin{table}
+        \centering
+        \begin{tabular}{ll}
+            $w$ & $c, g, b$中的一个值 \\ 
+            $T_w$ & 在$t$日的$w$交易情况 \\
+        \end{tabular}
+    \end{table}
+
+    每次Action需要决策两个量，分别是$T_g$和$T_b$，分别表示
+    Action Space:
+    \[
+        T_b \in [0, 1]
+    \]
+
+    \[
+        T_g \in 
+        \begin{cases}
+            [0, 1] & \mbox{if on prime day} \\
+            \{g\} & \mbox{otherwise}
+        \end{cases}    
+    \]
+
+    State Transition:(Enviroment Step)
+
+
+\end{document}
