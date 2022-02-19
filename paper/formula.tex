@@ -1,35 +1,36 @@
 \documentclass[a4paper]{ctexart}
-
+\usepackage{tikz}
 \usepackage{mathtools}
 \begin{document}
-    State Definition:
-    三元组$(c, g, b)$表示现金、黄金、比特币的持有比例。为了方便进行强化学习，这些数值是被归一化的，表示当前持仓的分配情况，他们的和为1。
 
-    符号说明：
+    \section{PPO - Reinforcement Learning}
 
-    \begin{table}
+    \begin{figure}[h]
         \centering
-        \begin{tabular}{ll}
-            $w$ & $c, g, b$中的一个值 \\ 
-            $T_w$ & 在$t$日的$w$交易情况 \\
-        \end{tabular}
-    \end{table}
+        \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
 
-    每次Action需要决策两个量，分别是$T_g$和$T_b$，分别表示
-    Action Space:
-    \[
-        T_b \in [0, 1]
-    \]
+        \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+            \draw    (75,164) -- (592,164) ;
+            \draw [shift={(594,164)}, rotate = 180] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+            \draw    (100,125) -- (100,200) ;
+            \draw    (524,126) -- (524,201) ;
+            \draw    (118,137) -- (509,137) ;
+            \draw [shift={(511,137)}, rotate = 180] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;    
+            \draw (84,102.4) node [anchor=north west][inner sep=0.75pt]    {$\rho _{t}{}_{-1}$};
+            \draw (585,178) node [anchor=north west][inner sep=0.75pt]   [align=left] {Time};
+            \draw (517,102.4) node [anchor=north west][inner sep=0.75pt]    {$\rho _{t}$};
+            \draw (281,112.4) node [anchor=north west][inner sep=0.75pt]    {$\boldsymbol{w}_{t}$};
+            \draw (313,113.4) node [anchor=north west][inner sep=0.75pt]    {$\boldsymbol{p}_{t}$};
+            \draw (96,209) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle t$};
+            \draw (510,206.4) node [anchor=north west][inner sep=0.75pt]    {$t+1$};
+        \end{tikzpicture}
+    \end{figure}
 
-    \[
-        T_g \in 
-        \begin{cases}
-            [0, 1] & \mbox{if on prime day} \\
-            \{g\} & \mbox{otherwise}
-        \end{cases}    
-    \]
+    \subsection{Trading Days}
+    In the single-day bitcoin and gold investment problem, each day is an independent trading cycle, and each day has an independent asset price. The smallest unit in which an asset allocation is made is a day. The gold market will be closed at a specific time, and no transactions can be conducted during the closed time period. 
 
-    State Transition:(Enviroment Step)
+    \subsection{Action \& Step}
+    At each step, the agent takes a action to adjust its asset quota. He makes a decision to 
 
 
 \end{document}
