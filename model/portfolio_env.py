@@ -97,7 +97,7 @@ class PortfolioEnv(gym.Env):
     def action_space(self):
         # Calculate whether we can trade gold on self.cur_date
         # and returns appropriate action space
-        return spaces.Box(low=0., high=10, shape=[3, ], dtype=np.float32)
+        return spaces.Box(low=-50, high=10, shape=[3, ], dtype=np.float32)
 
     def build_p(self, date: pd.Timestamp):
         pg = self.price['gold'].loc[date]
