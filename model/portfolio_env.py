@@ -5,6 +5,7 @@ import pandas as pd
 import copy
 import torch
 
+
 def bsearch(func, batch, f, t, *args, **kwargs):
     mid = (f + t) / 2
     for _ in range(batch):
@@ -34,7 +35,7 @@ def get_rho_no_gold(batch: int, f, t, rho, w, w_, p, p_, c):
 
     wa = np.array([w[0], w[2]])
     pa = np.array([p[0], p[2]])
-    
+
     def rho_func(rho_no_gold_):
         delta = rho_no_gold_ * w_ / p_ - rho_no_gold * wa / pa
         copy_p_ = copy.deepcopy(p_)
@@ -44,8 +45,9 @@ def get_rho_no_gold(batch: int, f, t, rho, w, w_, p, p_, c):
     rho_no_gold_ = bsearch(rho_func, batch, f, t)
     rho_aux = rho_no_gold_ * w_
     rho_ = rho_no_gold_ + gold_value
-    w_ = np.array([rho_aux[0], gold_value, rho_aux[1]]) / rho_ 
+    w_ = np.array([rho_aux[0], gold_value, rho_aux[1]]) / rho_
     return rho_, w_
+
 
 def get_rho(batch: int, f, t,  rho, w, w_, p, p_, c):
     rho = np.array(rho)
@@ -63,6 +65,7 @@ def get_rho(batch: int, f, t,  rho, w, w_, p, p_, c):
         return copy_p_.dot(delta)
 
     return bsearch(rho_func, batch, f, t)
+
 
 class PortfolioEnv(gym.Env):
     def __init__(self,
@@ -107,7 +110,6 @@ class PortfolioEnv(gym.Env):
         r = self.price.loc[self.cur_date -
                            pd.DateOffset(n=self.observation_length - 1): self.cur_date]
         return r.to_numpy()
-    
 
     def step(self, action):
         kwargs = {
@@ -118,7 +120,6 @@ class PortfolioEnv(gym.Env):
             'rho': self.currency
         }
         if self._check_gold_trade(self.cur_date):
-            assert(len(action) == 3)
             action = np.exp(action) / sum(np.exp(action))
             kwargs['w_'] = action
             rho_ = get_rho(100, 0, self.currency * 5, **kwargs)
@@ -128,13 +129,11 @@ class PortfolioEnv(gym.Env):
             action = np.array([action[0], action[2]], dtype=np.float32)
             action = np.exp(action) / sum(np.exp(action))
             kwargs['w_'] = action
-            assert(len(action) == 2)
-            assert(len(self.state) == 3)
-            assert(len(kwargs['p']) == 3) 
             kwargs['c'] = [0, 0.02]
-            kwargs['p_'] = np.array([kwargs['p'][0], kwargs['p'][2]], dtype=np.float32)
-            rho_, w_ = get_rho_no_gold(100, 0, self.currency * 5, **kwargs )
-            reward = np.log(rho_/ self.currency)
+            kwargs['p_'] = np.array(
+                [kwargs['p'][0], kwargs['p'][2]], dtype=np.float32)
+            rho_, w_ = get_rho_no_gold(100, 0, self.currency * 5, **kwargs)
+            reward = np.log(rho_ / self.currency)
             self.state = w_
         self.currency = rho_
         done = self.cur_date >= self.end_date - \
@@ -144,6 +143,8 @@ class PortfolioEnv(gym.Env):
         return observation, reward, done, {}
 
     def reset(self):
+        self.state = np.array([1., 0., 0.], dtype=np.float32)
+        # self.currency = 1000.
         self.cur_date = self.start_date + \
             pd.DateOffset(n=self.observation_length + 1)
         return self.build_observation()
