@@ -100,7 +100,7 @@ class PortfolioEnv(gym.Env):
     def action_space(self):
         # Calculate whether we can trade gold on self.cur_date
         # and returns appropriate action space
-        return spaces.Box(low=-50, high=10, shape=[3, ], dtype=np.float32)
+        return spaces.Box(low=-10, high=10, shape=[4, ], dtype=np.float32)
 
     def build_p(self, date: pd.Timestamp):
         pg = self.price['gold'].loc[date]
@@ -119,22 +119,30 @@ class PortfolioEnv(gym.Env):
             'c': [0, 0.01, 0.02],
             'rho': self.currency
         }
-        if self._check_gold_trade(self.cur_date):
-            action = np.exp(action) / sum(np.exp(action))
-            kwargs['w_'] = action
-            rho_ = get_rho(100, 0, self.currency * 5, **kwargs)
-            reward = np.log(rho_ / self.currency)
-            self.state = action
+        if action[0] < 3:
+            # No trade
+            def calc_rho_(p, p_, w, c, rho):
+                w_ = p_ / p * w
+                rho_ = (rho * p_ / p).dot(w)
+                return rho_, w_
+            rho_, w_ = calc_rho_(**kwargs)
         else:
-            action = np.array([action[0], action[2]], dtype=np.float32)
-            action = np.exp(action) / sum(np.exp(action))
-            kwargs['w_'] = action
-            kwargs['c'] = [0, 0.02]
-            kwargs['p_'] = np.array(
-                [kwargs['p'][0], kwargs['p'][2]], dtype=np.float32)
-            rho_, w_ = get_rho_no_gold(100, 0, self.currency * 5, **kwargs)
-            reward = np.log(rho_ / self.currency)
-            self.state = w_
+            action = action[1:]
+            if self._check_gold_trade(self.cur_date):
+                action = np.exp(action) / sum(np.exp(action))
+                kwargs['w_'] = action
+                rho_ = get_rho(100, 0, self.currency * 5, **kwargs)
+                self.state = action
+            else:
+                action = np.array([action[0], action[2]], dtype=np.float32)
+                action = np.exp(action) / sum(np.exp(action))
+                kwargs['w_'] = action
+                kwargs['c'] = [0, 0.02]
+                kwargs['p_'] = np.array(
+                    [kwargs['p'][0], kwargs['p'][2]], dtype=np.float32)
+                rho_, w_ = get_rho_no_gold(100, 0, self.currency * 5, **kwargs)
+                self.state = w_
+        reward = np.log(rho_ / self.currency)
         self.currency = rho_
         done = self.cur_date >= self.end_date - \
             pd.DateOffset(n=self.observation_length + 20)
@@ -144,7 +152,7 @@ class PortfolioEnv(gym.Env):
 
     def reset(self):
         self.state = np.array([1., 0., 0.], dtype=np.float32)
-        # self.currency = 1000.
+        self.currency = 1000.
         self.cur_date = self.start_date + \
             pd.DateOffset(n=self.observation_length + 1)
         return self.build_observation()
