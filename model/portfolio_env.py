@@ -123,9 +123,11 @@ class PortfolioEnv(gym.Env):
             # No trade
             def calc_rho_(p, p_, w, c, rho):
                 w_ = p_ / p * w
+                w_ /= w_.sum()
                 rho_ = (rho * p_ / p).dot(w)
                 return rho_, w_
             rho_, w_ = calc_rho_(**kwargs)
+            self.state = w_
         else:
             action = action[1:]
             if self._check_gold_trade(self.cur_date):
@@ -148,7 +150,7 @@ class PortfolioEnv(gym.Env):
             pd.DateOffset(n=self.observation_length + 20)
         observation = self.build_observation()
         self.cur_date = self.cur_date + pd.DateOffset(n=1)
-        return observation, reward, done, {}
+        return observation, reward, done, {'state': self.state} 
 
     def reset(self):
         self.state = np.array([1., 0., 0.], dtype=np.float32)
